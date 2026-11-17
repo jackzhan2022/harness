@@ -1,0 +1,20 @@
+/* Corporate palette applies only to the explicitly selected internal build. */
+body[data-xinji-brand] {
+  --dsw-alias-brand-primary: #2e78f5;
+  --dsw-alias-button-primary-fill: #2e78f5;
+  --dsw-alias-button-primary-hover: #2164d0;
+  --dsw-alias-label-primary-foreground: #fff;
+  --dsw-alias-state-business-primary: #2264ce;
+  --dsw-alias-state-business-tertiary: #eaf2ff;
+  --dsw-alias-bg-layer-1: #f6f8fc;
+}
+
+body[data-xinji-brand][data-ds-dark-theme] {
+  --dsw-alias-brand-primary: #78aaff;
+  --dsw-alias-button-primary-fill: #2e78f5;
+  --dsw-alias-button-primary-hover: #2164d0;
+  --dsw-alias-label-primary-foreground: #fff;
+  --dsw-alias-state-business-primary: #78aaff;
+  --dsw-alias-state-business-tertiary: #223950;
+  --dsw-alias-bg-layer-1: #121a26;
+}

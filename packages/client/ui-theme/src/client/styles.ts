@@ -8,6 +8,7 @@ import '../styles/onboarding.css'
 import '../styles/scrollbar.css'
 import '../styles/gradient-shadow-text.css'
 import '../styles/shiki.css'
+import '../styles/xinji.css'
 
 const HAIRLINE_WIDTH = '--dsh-hairline-width'
 

@@ -23,6 +23,19 @@ async function withDirectory(action: (directory: string) => Promise<void>): Prom
 }
 
 describe('Desktop local packaging configuration', () => {
+  it('isolates the unsigned Xinji Mac application identity', () => {
+    expect(localMacOSPackageEnvironment({ DSH_CLIENT_BRAND: 'xinji', DSH_DESKTOP_APP_ID: 'com.other.app' }))
+      .toMatchObject({ DSH_CLIENT_BRAND: 'xinji', DSH_DESKTOP_APP_ID: 'com.xinji.agent', DSH_DESKTOP_UNSIGNED: '1' })
+    expect(localMacOSPackageEnvironment({}).DSH_DESKTOP_APP_ID).toBe('com.deepseek.harness')
+  })
+
+  it('allows an unsigned Xinji package without upstream policy but requires it for signed builds', () => {
+    const internal = { DSH_CLIENT_BRAND: 'xinji', DSH_DESKTOP_APP_ID: 'com.xinji.agent' }
+    expect(() => validateDesktopPackageEnvironment(internal, WINDOWS, { unsigned: true })).not.toThrow()
+    expect(() => validateDesktopPackageEnvironment(internal, WINDOWS, {})).toThrow()
+    expect(() => validateDesktopPackageEnvironment({ DSH_DESKTOP_APP_ID: 'com.xinji.agent' }, WINDOWS, { unsigned: true })).toThrow()
+  })
+
   it('loads file-owned compression and defaults to fast Windows archive compression', async () => {
     expect(resolveWindowsPackageSettings({}).compressionLevel).toBe(3)
     await withDirectory(async (directory) => {

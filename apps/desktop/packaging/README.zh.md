@@ -153,6 +153,10 @@ bash apps/desktop/scripts/macos-runner-service.sh status "$HOME/dsh-ci/runner"
 
 ## 未签名 Windows 测试安装包
 
+信计内部构建在编译前设置 `DSH_CLIENT_BRAND=xinji`，本地客户端配置保留公司标识、任务入口和主题。在 `.env.windows` 中设置 `DSH_DESKTOP_APP_ID=com.xinji.agent`，使用独立的应用标识。打包后的名称 `xinji-agent` 使 Electron 默认配置目录与原版分开。这个未签名版本在清单中记录 `dshXinjiInternal`，无需上游强制更新服务，并关闭上游产品统计；签名构建仍须满足发布策略要求。模型访问仍需用户配置服务商，本版本不提供企业认证或管理后台。
+
+未签名信计构建支持通过 `--build-version` 指定独立的语义化产品版本，例如 `1.0.1`；底层 Harness 包版本保持不变。此例外不适用于签名构建或上游发布。
+
 在 Windows x64 上，使用完整的未签名打包命令进行本地安装测试：
 
 ```sh

@@ -81,6 +81,15 @@ function repositoryFixture(version = '1.2.3-rc.4'): string {
 }
 
 describe('client build environment', () => {
+  it('retains the Xinji brand in a named local build', () => {
+    expect(resolveClientBuildEnvironment({
+      DSH_CLIENT_BRAND: 'xinji', DSH_CLIENT_COMMIT_HASH: COMMIT_HASH,
+      DSH_CLIENT_VERSION: '1.2.3',
+    }, 'local')).toMatchObject({
+      DSH_CLIENT_BRAND: 'xinji', DSH_CLIENT_TITLE: '信计 Agent 工作平台',
+      DSH_CLIENT_BUILD_PROFILE: 'local',
+    })
+  })
   it('requires an exact public environment for a named artifact profile', () => {
     const expected = {
       DSH_CLIENT_BUILD_PROFILE: 'official',

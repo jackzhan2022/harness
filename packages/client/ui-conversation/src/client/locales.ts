@@ -7,8 +7,39 @@ export const NS = 'conversation'
 const PLAN_NEXT_ACTION_ZH = '描述你的任务以生成计划'
 const PLAN_NEXT_ACTION_EN = 'describe your task to generate plan'
 
+const XINJI_HOME_EN = {
+  'hero.internal.headline': 'Intelligence for every task',
+  'hero.internal.description': 'Empower business and engineering. Choose a workspace to start your task.',
+  'hero.internal.starters': 'Task starters',
+  'hero.internal.choose': 'Use this starter →',
+  'hero.internal.hint': 'Starters fill the draft for your review. Choose a workspace first; existing drafts are preserved.',
+  'hero.internal.proposal.title': 'Business writing',
+  'hero.internal.proposal.description': 'Structure requirements, project proposals and review documents.',
+  'hero.internal.proposal.prompt': 'Help me draft a project proposal. First ask me about the project background, goals, scope and acceptance criteria. Do not invent missing facts.',
+  'hero.internal.development.title': 'Engineering support',
+  'hero.internal.development.description': 'Understand code, investigate issues and plan implementation.',
+  'hero.internal.development.prompt': 'Review the current project structure and explain the main components and startup process. Read the project instructions first and do not modify files yet.',
+  'hero.internal.analysis.title': 'Data analysis',
+  'hero.internal.analysis.description': 'Organize data and turn findings into useful reports.',
+  'hero.internal.analysis.prompt': 'Help me analyze business data. First confirm the data source, metric definitions and analysis goals. Identify missing data before making conclusions.',
+}
+
 /** Simplified Chinese dictionary (the key-set source of truth). */
 export const zh = {
+  'hero.internal.headline': '让每一项工作，都有智能助力',
+  'hero.internal.description': '为业务提效，为研发加速。选择工作区，开始你的任务。',
+  'hero.internal.starters': '常用任务入口',
+  'hero.internal.choose': '使用此任务模板 →',
+  'hero.internal.hint': '模板仅填入草稿，确认后再发送；请先选择工作区，已有草稿不会被覆盖',
+  'hero.internal.proposal.title': '业务方案',
+  'hero.internal.proposal.description': '梳理需求、撰写方案，形成可交付的业务文档',
+  'hero.internal.proposal.prompt': '请帮我撰写一份项目建设方案。先向我确认项目背景、建设目标、业务范围和验收要求，缺少的信息请提问，不要编造事实。',
+  'hero.internal.development.title': '研发协作',
+  'hero.internal.development.description': '理解项目代码、排查问题，辅助实现与验证',
+  'hero.internal.development.prompt': '请分析当前工作区的项目结构，说明主要模块、技术栈和启动方式。先阅读项目约定，暂时不要修改文件。',
+  'hero.internal.analysis.title': '数据分析',
+  'hero.internal.analysis.description': '整理业务数据、发现变化，输出清晰的分析报告',
+  'hero.internal.analysis.prompt': '请帮我分析业务数据。先确认数据来源、指标口径和分析目标，明确缺失数据后再给出结论。',
   'quote.remove': '移除引用',
   'shortcut.newline': '换行',
   'shortcut.complementary': '使用互补的 Queue／Steer 方式',
@@ -415,6 +446,7 @@ export type ConversationKey = keyof typeof zh
 
 /** English dictionary, checked complete against the zh key set. */
 export const en = {
+  ...XINJI_HOME_EN,
   'quote.remove': 'Remove quote',
   'shortcut.newline': 'New line',
   'shortcut.complementary': 'Use the complementary Queue / Steer action',
@@ -820,6 +852,7 @@ export const en = {
 
 /** Japanese copy, checked against the English keys. */
 export const ja = {
+  ...XINJI_HOME_EN,
   'quote.remove': '引用を削除',
   'shortcut.newline': '改行',
   'shortcut.complementary': '補助のキュー / 実行中の指示変更を使用',
@@ -1223,6 +1256,7 @@ export const ja = {
 
 /** Spanish dictionary, checked against the English keys. */
 export const es = {
+  ...XINJI_HOME_EN,
   'quote.remove': 'Eliminar cotización',
   'shortcut.newline': 'Nueva linea',
   'shortcut.complementary': 'Usar la acción alternativa de poner en cola o redirigir',
@@ -1628,6 +1662,7 @@ export const es = {
 
 /** French dictionary, checked against the English keys. */
 export const fr = {
+  ...XINJI_HOME_EN,
   'quote.remove': 'Supprimer le devis',
   'shortcut.newline': 'Nouvelle ligne',
   'shortcut.complementary': 'Utiliser l’action alternative de mise en attente ou de guidage',
@@ -2033,6 +2068,7 @@ export const fr = {
 
 /** German dictionary, checked against the English keys. */
 export const de = {
+  ...XINJI_HOME_EN,
   'quote.remove': 'Zitat entfernen',
   'shortcut.newline': 'Neue Zeile',
   'shortcut.complementary': 'Die alternative Aktion zum Vormerken oder Lenken verwenden',
@@ -2438,6 +2474,7 @@ export const de = {
 
 /** Russian dictionary, checked against the English keys. */
 export const ru = {
+  ...XINJI_HOME_EN,
   'quote.remove': 'Удалить цитату',
   'shortcut.newline': 'Новая линия',
   'shortcut.complementary': 'Использовать альтернативное действие: поставить в очередь или направить',
@@ -2843,6 +2880,7 @@ export const ru = {
 
 /** Portuguese dictionary, checked against the English keys. */
 export const pt = {
+  ...XINJI_HOME_EN,
   'quote.remove': 'Remover cotação',
   'shortcut.newline': 'Nova linha',
   'shortcut.complementary': 'Usar a ação alternativa de enfileirar ou orientar',

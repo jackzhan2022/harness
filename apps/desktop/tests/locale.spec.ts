@@ -1,8 +1,19 @@
 import { SHIPPED_LOCALE_IDS } from '../../../scripts/shipped-locales.ts'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { en, formatDesktopMessage, resolveDesktopLocale, resolveDesktopStartupLocale, ja, zh, es, fr, de, ru, pt } from '../src/locale.ts'
 
 describe('desktop locale dictionaries', () => {
+  it('uses the internal name in native windows and keeps the upstream dictionaries intact', () => {
+    vi.stubEnv('DSH_CLIENT_BRAND', 'xinji')
+    try {
+      expect(resolveDesktopLocale('zh-CN').messages.welcomeBrand).toBe('信计 Agent 工作平台')
+      expect(resolveDesktopLocale('en-US').messages.aboutProduct).toBe('Xinji Agent Workspace')
+      expect(zh.welcomeBrand).toBe('DeepSeek Harness')
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
   it('uses the same concise Chinese configuration error in the toast and details', () => {
     for (const message of [zh.updateConfigurationRead, zh.updateConfigurationFormat, zh.updateConfigurationChannel]) {
       expect(message).toBe('配置文件异常，更新已暂停')

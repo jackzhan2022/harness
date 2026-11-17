@@ -5,7 +5,7 @@ import { copyFileSync, mkdirSync, mkdtempSync, realpathSync, symlinkSync, writeF
 import { rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join, relative } from 'node:path'
-import { expect, it, onTestFinished } from 'vitest'
+import { expect, it, onTestFinished, vi } from 'vitest'
 import { prepareDesktopCli } from '../scripts/prepare-cli.ts'
 
 function fixture() {
@@ -24,7 +24,9 @@ function fixture() {
   const resources = join(application, ...platform === 'darwin' ? ['Contents', 'Resources'] : ['resources'])
   const cli = join(resources, 'runtime', 'cli')
   prepareDesktopCli(cli, platform)
-  const electron = join(application, ...platform === 'darwin' ? ['Contents', 'MacOS', 'DeepSeek Harness'] : ['DeepSeek Harness.exe'])
+  const executableName = process.env.DSH_CLIENT_BRAND === 'xinji' ? 'xinji-agent.exe' : 'DeepSeek Harness.exe'
+  const macExecutableName = process.env.DSH_CLIENT_BRAND === 'xinji' ? '信计 Agent 工作平台' : 'DeepSeek Harness'
+  const electron = join(application, ...platform === 'darwin' ? ['Contents', 'MacOS', macExecutableName] : [executableName])
   mkdirSync(dirname(electron), { recursive: true })
   if (platform === 'win32') copyFileSync(process.execPath, electron)
   else symlinkSync(process.execPath, electron)
@@ -61,6 +63,17 @@ function fixture() {
   }
   return { root, command, start }
 }
+
+it('launches the renamed Xinji executable from its installed command', async () => {
+  vi.stubEnv('DSH_CLIENT_BRAND', 'xinji')
+  try {
+    const f = fixture()
+    const run = f.start(['--help'])
+    run.child.stdin.end()
+    expect(await run.closed, run.stderr()).toBe(23)
+    expect(JSON.parse(run.stdout())).toMatchObject({ args: ['--help'], nodeMode: '1' })
+  } finally { vi.unstubAllEnvs() }
+})
 
 it('preserves common arguments, cwd, environment, binary input, stderr and exit status', async () => {
   const f = fixture()

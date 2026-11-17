@@ -20,7 +20,7 @@ import { resolveWindowsPackageSettings } from './windows-package-settings.mjs'
 import { packagingErrorDetails, packagingStep } from './packaging-step.mjs'
 import { notarizeMacOS } from './notarize-macos.mjs'
 import { resolveMacOSNotarizationEnvironment } from './desktop-release-environment.mjs'
-import { DESKTOP_BUILD_VERSION_ENV, resolveDesktopBuildVersion, validateDesktopBuildVersion } from './desktop-build-version.mjs'
+import { DESKTOP_BUILD_VERSION_ENV, resolveDesktopBuildVersion } from './desktop-build-version.mjs'
 import { suggestDesktopBuildVersion } from './desktop-build-version-discovery.ts'
 import { desktopBuildCommitEnvironment, readDesktopBuildCommit, resolveDesktopBuildCommit } from './desktop-build-commit.mjs'
 import { requireDesktopToolchain } from './desktop-toolchain-preflight.ts'
@@ -327,7 +327,10 @@ async function resolveRequestedBuildVersion(
 ): Promise<string> {
   const requested = invocation.requestedBuildVersion
   if (requested === undefined) return productVersion
-  if (requested !== AUTOMATIC_BUILD_VERSION) return validateDesktopBuildVersion(requested, productVersion)
+  if (requested !== AUTOMATIC_BUILD_VERSION) return resolveDesktopBuildVersion({
+    ...environment, DSH_DESKTOP_UNSIGNED: invocation.unsigned ? '1' : '0',
+    [DESKTOP_BUILD_VERSION_ENV]: requested,
+  }, productVersion)
   const paths = desktopTargetBuildPaths(invocation.target.name, environment)
   return suggestDesktopBuildVersion({
     productVersion, target: invocation.target.name,
@@ -402,7 +405,8 @@ async function main(): Promise<void> {
   if (success && target.platform === 'darwin' && !invocation.directory && !invocation.prepareOnly) {
     const paths = desktopTargetBuildPaths(target.name, environment)
     const output = desktopArtifactOutput(paths, invocation)
-    const filename = `deepseek-harness-${buildVersion}-mac-${target.arch}${output.suffix}.dmg`
+    const prefix = environment.DSH_CLIENT_BRAND === 'xinji' ? 'xinji-agent' : 'deepseek-harness'
+    const filename = `${prefix}-${buildVersion}-mac-${target.arch}${output.suffix}.dmg`
     console.log(`DMG: ${join(output.directory, filename)}`)
   }
 }

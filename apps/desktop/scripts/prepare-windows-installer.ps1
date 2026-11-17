@@ -68,8 +68,9 @@ if ($TestProgress -or $CompileProgressOnly) {
     }
 }
 Add-Type -AssemblyName System.Drawing
+$artworkRoot = if ($env:DSH_CLIENT_BRAND -eq 'xinji') { Join-Path $PSScriptRoot '../resources/xinji-installer' } else { Join-Path $installerRoot 'assets' }
 foreach ($asset in @('brand', 'brand-2x', 'brand-dark', 'brand-dark-2x', 'uninstaller-sidebar')) {
-    $image = [Drawing.Image]::FromFile((Join-Path $installerRoot "assets/$asset.png"))
+    $image = [Drawing.Image]::FromFile((Join-Path $artworkRoot "$asset.png"))
     try {
         $bitmap = [Drawing.Bitmap]::new($image.Width, $image.Height, [Drawing.Imaging.PixelFormat]::Format24bppRgb)
         try {

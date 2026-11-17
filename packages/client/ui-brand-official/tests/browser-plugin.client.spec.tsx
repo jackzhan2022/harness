@@ -38,6 +38,21 @@ async function bench(declare = true) {
 }
 
 describe('official browser-brand plugin', () => {
+  it('uses Xinji marks on the real sidebar and home without the whale frame', async () => {
+    vi.stubEnv('DSH_CLIENT_BRAND', 'xinji')
+    const subject = await bench()
+    subject.ctx.provide('locale', { register: () => () => {} } as never)
+    const fiber = subject.ctx.plugin({ inject: [...inject], apply })
+    await fiber.await()
+    expect(subject.slots.entries('sidebar.brand.mark')).toHaveLength(1)
+    expect(subject.slots.entries('sidebar.brand.name')).toHaveLength(1)
+    expect(subject.slots.entries(HERO_HOLE)).toHaveLength(1)
+    expect(subject.slots.entries('conversation.hero.frame')).toHaveLength(0)
+    await fiber.dispose()
+    expect(subject.slots.entries('sidebar.brand.mark')).toHaveLength(0)
+    expect(subject.slots.entries(HERO_HOLE)).toHaveLength(0)
+  })
+
   it('keeps the host Loader entry inert', () => {
     expect(hostApply).not.toThrow()
   })

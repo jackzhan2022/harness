@@ -89,6 +89,9 @@ export function validateDesktopBuildVersion(buildVersion, productVersion) {
 export function resolveDesktopBuildVersion(env, productVersion) {
   const buildVersion = env[DESKTOP_BUILD_VERSION_ENV]?.trim()
   if (buildVersion === undefined || buildVersion === '') return productVersion
+  if (env.DSH_CLIENT_BRAND === 'xinji' && env.DSH_DESKTOP_UNSIGNED === '1') {
+    return parseVersion(buildVersion, 'internal product version').version
+  }
   return validateDesktopBuildVersion(buildVersion, productVersion)
 }
 

@@ -208,6 +208,10 @@ export function resolveClientBuildEnvironment(
         DSH_CLIENT_BUILD_PROFILE: 'local',
         ...(environment.DSH_CLIENT_GIT_DIRTY === 'true' ? { DSH_CLIENT_GIT_DIRTY: 'true' } : {}),
       }),
+      ...(environment.DSH_CLIENT_BRAND === 'xinji' ? {
+        DSH_CLIENT_BRAND: 'xinji',
+        DSH_CLIENT_TITLE: '信计 Agent 工作平台',
+      } : {}),
     }
   }
   throw new Error(`unknown client build profile ${JSON.stringify(profile)}; expected "official" or "local"`)

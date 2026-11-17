@@ -422,6 +422,18 @@ function mount(
 }
 
 describe('Hero chrome', () => {
+  it('introduces business and engineering work in the Xinji build', () => {
+    vi.stubEnv('DSH_CLIENT_BRAND', 'xinji')
+    try {
+      const view = render(<HeroShell t={makeTranslate(zh, commonZh)} renderSlot={(() => null) as never} />)
+      expect(view.getByText('让每一项工作，都有智能助力')).toBeTruthy()
+      expect(view.getByText('为业务提效，为研发加速。选择工作区，开始你的任务。')).toBeTruthy()
+      expect(view.queryByText('预览版')).toBeNull()
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
   it('renders the English preview badge through the hero locale seat', () => {
     const renderSlot = vi.fn<(key: string, owner: object, opts?: { fallback?: ReactNode }) => ReactNode>(() => null)
     const view = render(<HeroShell t={makeTranslate(en, commonEn)} renderSlot={renderSlot as never} />)

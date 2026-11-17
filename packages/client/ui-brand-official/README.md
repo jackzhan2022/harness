@@ -41,6 +41,8 @@ The artwork values are fixed and the row takes no configuration. This is built-i
 
 ### Replacing the brand
 
+The internal `DSH_CLIENT_BRAND=xinji` build selects the supplied company artwork for the sidebar and conversation hero, registers Chinese and English identity text through the locale service, and marks the document body for the corporate theme. It omits the whale frame. Removing this plugin restores the previous body attribute. Other builds retain the profile behavior above.
+
 A deployment with its own identity leaves this package out and composes another package that occupies the sidebar slots and the `conversation.hero.frame` layer — and the hero-mark slot, which this package leaves on its fallback. Occupying a slot is the only composition route; the artwork identity is not configurable.
 
 -----

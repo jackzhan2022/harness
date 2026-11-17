@@ -5,6 +5,7 @@ import { workspaceDisplayTitle } from '@deepseek-ai/dsh-api-workspace-controller
 import type { ConversationContentProps, ConversationViewsProps, InputZone } from '../contract/slots.ts'
 import { HeroShell, WorkspaceChip, workspaceLabel } from './EmptyHero.tsx'
 import css from './ConversationRoot.module.css'
+import { XinjiQuickStarts } from './XinjiQuickStarts.tsx'
 
 function ConversationSessionView({ renderSlot }: ConversationViewsProps) {
   return renderSlot('conversation.session', {})
@@ -168,6 +169,18 @@ export function ConversationContent(props: ConversationContentProps) {
       {hero && heroWorkspaceRow}
       {zone !== undefined && renderSlot('conversation.input.dock', zone)}
       {inputBar}
+      {hero && process.env.DSH_CLIENT_BRAND === 'xinji' && <XinjiQuickStarts
+        t={t}
+        disabled={inputState !== undefined && (inputState.draft.trim() !== '' || inputState.attachmentIds.length > 0 || inputState.phase !== 'plain')}
+        onSelect={(prompt) => {
+          if (inert) {
+            setPickerOpen(true)
+            return
+          }
+          props.inputActions?.setDraft(prompt)
+          props.inputActions?.persistDraft()
+        }}
+      />}
     </div>
   )
 

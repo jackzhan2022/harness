@@ -131,6 +131,7 @@ function HeroFish({ hovering }: { hovering: boolean }) {
  */
 export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
   const [hovering, setHovering] = useState(false)
+  const internal = process.env.DSH_CLIENT_BRAND === 'xinji'
   return (
     <div className={css.root}>
       <div className={css.stack}>
@@ -152,11 +153,12 @@ export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
           </span>
           <span className={css.titleGroup}>
             {/* Own element: keeps the headline text addressable apart from the badge. */}
-            <span>{t('hero.headline')}</span>
-            <span className={css.previewBadge}>{t('hero.preview')}</span>
+            <span>{t(internal ? 'hero.internal.headline' : 'hero.headline')}</span>
+            {!internal && <span className={css.previewBadge}>{t('hero.preview')}</span>}
           </span>
         </div>
         <div className={css.body}>
+          {internal && <p className={css.internalDescription}>{t('hero.internal.description')}</p>}
           {/* The composer remains mounted outside this component. */}
         </div>
       </div>

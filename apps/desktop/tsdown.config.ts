@@ -30,7 +30,10 @@ const clientVersion = clientEnvironment.DSH_CLIENT_VERSION
 if (clientVersion === undefined) throw new Error('desktop build: the client environment carries no DSH_CLIENT_VERSION')
 
 /** Inline the one public build value the Node entry reads; every other variable stays a runtime lookup. */
-const clientVersionDefine = { 'process.env.DSH_CLIENT_VERSION': JSON.stringify(clientVersion) }
+const clientVersionDefine = {
+  'process.env.DSH_CLIENT_VERSION': JSON.stringify(clientVersion),
+  'process.env.DSH_CLIENT_BRAND': JSON.stringify(clientEnvironment.DSH_CLIENT_BRAND),
+}
 
 export default defineConfig([
   {
@@ -74,7 +77,10 @@ export default defineConfig([
         }],
         root: fileURLToPath(new URL('.', import.meta.url)),
         esbuild: { jsx: 'automatic' },
-        define: { 'process.env.NODE_ENV': JSON.stringify('production') },
+        define: {
+          'process.env.NODE_ENV': JSON.stringify('production'),
+          'process.env.DSH_CLIENT_BRAND': JSON.stringify(clientEnvironment.DSH_CLIENT_BRAND),
+        },
         build: {
           outDir: 'lib/welcome',
           emptyOutDir: true,

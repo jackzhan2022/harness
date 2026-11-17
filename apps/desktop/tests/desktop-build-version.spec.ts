@@ -10,6 +10,14 @@ const PRERELEASE = '0.1.6-alpha.2'
 const STABLE = '0.1.6'
 
 describe('desktop build version', () => {
+  it('accepts an independent product version only for unsigned Xinji builds', () => {
+    const environment = { DSH_CLIENT_BRAND: 'xinji', DSH_DESKTOP_UNSIGNED: '1',
+      [DESKTOP_BUILD_VERSION_ENV]: '1.0.1' }
+    expect(resolveDesktopBuildVersion(environment, PRERELEASE)).toBe('1.0.1')
+    expect(() => resolveDesktopBuildVersion({ ...environment, DSH_DESKTOP_UNSIGNED: '0' }, PRERELEASE)).toThrow()
+    expect(() => resolveDesktopBuildVersion({ ...environment, DSH_CLIENT_BRAND: '' }, PRERELEASE)).toThrow()
+    expect(() => resolveDesktopBuildVersion({ ...environment, [DESKTOP_BUILD_VERSION_ENV]: 'invalid' }, PRERELEASE)).toThrow()
+  })
   it('publishes the product version when no build version is present', () => {
     expect(resolveDesktopBuildVersion({}, PRERELEASE)).toBe(PRERELEASE)
     expect(resolveDesktopBuildVersion({ [DESKTOP_BUILD_VERSION_ENV]: '   ' }, PRERELEASE)).toBe(PRERELEASE)

@@ -534,7 +534,9 @@ async function main(): Promise<void> {
   const backend = new DesktopBackendController((onFailure) => {
     const hostInspectPort = developmentHostInspectPort(development)
     const host = new DesktopHostProcess(resources.node, resources.dsh, activeProject,
-      hostInspectPort, { ...hostEnvironment, DSH_CLIENT_VERSION: desktopClientVersion() }, onFailure,
+      hostInspectPort, { ...hostEnvironment, DSH_CLIENT_VERSION: desktopClientVersion(),
+        ...(process.env.DSH_CLIENT_BRAND === 'xinji' ? { DSH_CLIENT_BRAND: 'xinji' } : {}),
+      }, onFailure,
       primaryRuntime,
       resources, (next) => { platformView.setSession(next) }, (record) => {
         operationJournal ??= new OperationJournal(join(app.getPath('userData'), 'plugin-operations'), {
@@ -1155,10 +1157,11 @@ async function main(): Promise<void> {
     updates.dispose()
   })
 
-  const applicationIconPath = development ? join(app.getAppPath(), 'resources', 'icon-windows.png')
+  const applicationIconPath = development ? join(app.getAppPath(), 'resources',
+    process.env.DSH_CLIENT_BRAND === 'xinji' ? 'xinji-icon.png' : 'icon-windows.png')
     : join(process.resourcesPath, 'icon.png')
   app.setAboutPanelOptions({
-    applicationName: 'DeepSeek Harness',
+    applicationName: process.env.DSH_CLIENT_BRAND === 'xinji' ? '信计 Agent 工作平台' : 'DeepSeek Harness',
     applicationVersion: app.getVersion(),
     // The release has no separate build number; omit Electron's bundle version.
     version: '',
@@ -1240,7 +1243,8 @@ async function main(): Promise<void> {
     tray?.relabel()
   }
   refreshApplicationMenu()
-  const trayIconPath = development ? join(app.getAppPath(), 'resources', 'tray-windows.ico') : join(process.resourcesPath, 'tray.ico')
+  const trayIconPath = development ? join(app.getAppPath(), 'resources',
+    process.env.DSH_CLIENT_BRAND === 'xinji' ? 'xinji-icon.ico' : 'tray-windows.ico') : join(process.resourcesPath, 'tray.ico')
   if (process.platform === 'win32') {
     // The tray is the way back to a hidden window; without it, relaunching the application still focuses it.
     try {
@@ -1551,7 +1555,9 @@ async function main(): Promise<void> {
   const policyInput: unknown = app.isPackaged
     ? ('dshMandatoryUpdatePolicy' in manifest ? manifest.dshMandatoryUpdatePolicy : undefined)
     : developmentPolicy === undefined ? undefined : JSON.parse(developmentPolicy) as unknown
-  const policyConfig = resolveDesktopPolicyConfig(policyInput, !app.isPackaged)
+  const internalUnsigned = process.env.DSH_CLIENT_BRAND === 'xinji'
+    && 'dshXinjiInternal' in manifest && manifest.dshXinjiInternal === true
+  const policyConfig = resolveDesktopPolicyConfig(policyInput, !app.isPackaged || internalUnsigned)
   if (policyConfig !== undefined) {
     if (policyConfig.authentication === 'feishu-test') {
       policyAuth = new DesktopPolicyTestAuth(policyConfig.origin, policyConfig.allowedAuthOrigins, locale,

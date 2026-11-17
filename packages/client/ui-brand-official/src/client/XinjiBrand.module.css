@@ -1,0 +1,12 @@
+.identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.name {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}

@@ -1,0 +1,99 @@
+name: Xinji Agent · macOS internal package
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_version:
+        description: 'Internal product version (SemVer)'
+        required: true
+        default: '1.0.1'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: xinji-macos-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Package ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x64
+    defaults:
+      run:
+        shell: bash
+    env:
+      DSH_CLIENT_BRAND: xinji
+      DSH_TELEMETRY_DISABLED: '1'
+      DSH_DESKTOP_TARGET_PLATFORM: darwin
+      DSH_DESKTOP_TARGET_ARCH: ${{ matrix.arch }}
+      BUILD_VERSION: ${{ inputs.build_version }}
+      DSH_GATE_CONCURRENCY: '1'
+      DSH_OXLINT_THREADS: '2'
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v5.0.0
+        with:
+          package_json_file: package.json
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24.21.0'
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Check native architecture and version
+        run: |
+          node --input-type=module -e '
+            import { resolveDesktopBuildVersion } from "./apps/desktop/scripts/desktop-build-version.mjs";
+            if (process.arch !== process.env.DSH_DESKTOP_TARGET_ARCH) throw Error("Runner architecture mismatch");
+            resolveDesktopBuildVersion({ ...process.env, DSH_DESKTOP_UNSIGNED: "1", DSH_DESKTOP_BUILD_VERSION: process.env.BUILD_VERSION }, "0.2.2-rc.3");
+          '
+      - name: Check packaging contracts
+        run: >-
+          pnpm exec vitest run
+          apps/desktop/tests/desktop-package-environment.spec.ts
+          apps/desktop/tests/desktop-build-version.spec.ts
+          apps/desktop/tests/installer-packaging.spec.ts
+          apps/desktop/tests/cli-launcher.spec.ts
+          --testTimeout 30000
+      - name: Build and smoke-test unsigned DMG
+        run: |
+          mkdir -p output
+          set -o pipefail
+          pnpm --dir apps/desktop run "package:mac:${DSH_DESKTOP_TARGET_ARCH}:unsigned" --build-version "$BUILD_VERSION" 2>&1 | tee output/macos-package.log
+      - name: Collect installer and checksum
+        run: |
+          mkdir -p output/macos
+          cp apps/desktop/.desktop-build/targets/mac-"$DSH_DESKTOP_TARGET_ARCH"/unsigned-artifacts/*.dmg output/macos/
+          (cd output/macos && shasum -a 256 ./*.dmg > SHA256.txt)
+      - name: Upload installer
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: xinji-agent-${{ inputs.build_version }}-mac-${{ matrix.arch }}
+          path: output/macos/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: xinji-macos-logs-${{ matrix.arch }}
+          path: |
+            output/macos-package.log
+            apps/desktop/.desktop-build/packaging-runs/
+          if-no-files-found: ignore
+          retention-days: 7

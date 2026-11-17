@@ -11,6 +11,14 @@
   padding: 0 24px;
 }
 
+.internalDescription {
+  margin: 4px 0 12px;
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--dsw-alias-label-secondary);
+  text-align: center;
+}
+
 /* Cap matches the InputBar card. Glow may paint past the sides. */
 .stack {
   display: flex;

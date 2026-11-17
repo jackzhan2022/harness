@@ -153,6 +153,10 @@ The installer copies its startup script into `runner/dsh-service`, sets the serv
 
 ## Unsigned Windows test installer
 
+For the Xinji internal build, set `DSH_CLIENT_BRAND=xinji` before building. The local client profile retains the company identity, task starters and theme. Set `DSH_DESKTOP_APP_ID=com.xinji.agent` in `.env.windows` for an independent application identity. The packaged name `xinji-agent` separates Electron's default profile directory. This unsigned variant records `dshXinjiInternal` in its manifest, runs without the upstream mandatory-update service, and disables upstream product analytics. Signed builds retain the release-policy requirements. Model access still requires the user's provider configuration; this variant does not supply enterprise authentication or administration.
+
+An unsigned Xinji build accepts an independent semantic product version through `--build-version`, for example `1.0.1`. The underlying Harness package version stays unchanged. This exception does not apply to signed builds or upstream publication.
+
 On Windows x64, use the complete unsigned packaging command for local installation testing:
 
 ```sh

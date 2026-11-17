@@ -41,6 +41,8 @@ kind: "package-reference"
 
 ### 替换品牌
 
+内部构建 `DSH_CLIENT_BRAND=xinji` 在侧栏与会话首屏使用提供的公司标识，通过语言服务注册中英文品牌文案，并在文档 body 上设置企业主题标记；该构建不加载鲸鱼背景。卸载插件会恢复原有 body 属性。其他构建保留上述 profile 行为。
+
 自有身份的部署不组合本包，而是组合另一个占据侧栏 slot 和 `conversation.hero.frame` 层——以及本包留给回退的首屏标志 slot——的包。占据 slot 是唯一的组合路径；品牌图形身份不可配置。
 
 -----

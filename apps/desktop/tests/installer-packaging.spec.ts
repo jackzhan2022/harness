@@ -18,6 +18,19 @@ vi.mock('node:fs/promises', async importOriginal => ({
 }))
 
 describe('installer preparation preserves application dependencies', () => {
+  it.each(['win32', 'darwin'] as const)('isolates the unsigned Xinji package from official release services on %s', async (platform) => {
+    const { createElectronBuilderConfig } = await import('../scripts/electron-builder-config.mjs')
+    const config = createElectronBuilderConfig({
+      DSH_DESKTOP_APP_ID: 'com.xinji.agent', DSH_CLIENT_BRAND: 'xinji',
+      DSH_DESKTOP_UNSIGNED: '1', DSH_DESKTOP_AUTO_UPDATE_ENV: 'test',
+    }, platform, 'x64')
+    expect(config.productName).toBe('信计 Agent 工作平台')
+    expect(config.extraMetadata).toMatchObject({ name: 'xinji-agent', dshXinjiInternal: true, dshDesktopAppId: 'com.xinji.agent' })
+    expect(config.extraMetadata).not.toHaveProperty('dshMandatoryUpdatePolicy')
+    expect(config.artifactName).toContain('xinji-agent-')
+    expect(config.win.icon).toContain('xinji-icon.ico')
+    expect(config.mac.icon).toContain('xinji-icon.png')
+  })
   it.each(['win32', 'darwin'] as const)('rejects a missing production policy before signing on %s', async (platform) => {
     const { createElectronBuilderConfig } = await import('../scripts/electron-builder-config.mjs')
     expect(() => createElectronBuilderConfig({ DSH_DESKTOP_APP_ID: 'com.example.installer',
