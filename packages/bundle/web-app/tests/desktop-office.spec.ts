@@ -130,6 +130,12 @@ it('mounts packaged Desktop skills with the primary runtime Python beside the Of
   expect((await ctx.skills.get('office'))?.content).toContain('`office_convert`')
 })
 
+it.each([['xinji', 180_000], ['deepseek', 60_000]])('sets the %s Office conversion deadline to %i milliseconds', async (brand, timeoutMs) => {
+  vi.stubEnv('DSH_CLIENT_BRAND', brand)
+  const { ctx } = await boot('desktop', root => join(root, 'primary-runtime'))
+  expect(ctx.loader.resolve('office-kit').fiber?.effectiveConfig).toHaveProperty('timeoutMs', timeoutMs)
+})
+
 it('keeps the Office tools and returns the unavailable Kit error to the model when Kit is absent', async () => {
   const { ctx, workspace } = await boot('web', () => undefined)
   await writeFile(join(workspace, 'report.docx'), 'docx bytes')

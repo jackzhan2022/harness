@@ -206,8 +206,9 @@ export function apply(ctx) {
     assertOfficeSkillsLoadable(loadedSkills)
     console.log('desktop runtime: packaged Office skills listed and loaded')
     for (const { extension } of inputs) {
+      const started = performance.now()
       const converted = await fetch(new URL(`/desktop-smoke-office/${extension}`, ready.url), {
-        headers: { cookie }, signal: AbortSignal.timeout(120_000),
+        headers: { cookie }, signal: AbortSignal.timeout(240_000),
       })
       if (!converted.ok) throw new Error(`desktop runtime: ${extension} conversion failed: ${await converted.text()}`)
       const pdf = Buffer.from(await converted.arrayBuffer())
@@ -215,10 +216,12 @@ export function apply(ctx) {
         || !pdf.subarray(-1024).toString().trimEnd().endsWith('%%EOF')) {
         throw new Error(`desktop runtime: invalid ${extension} PDF output`)
       }
+      console.log(`desktop runtime: ${extension} PDF passed (${Math.round(performance.now() - started)}ms)`)
     }
     for (const { extension } of inputs) {
+      const started = performance.now()
       const operations = await fetch(new URL(`/desktop-smoke-office-operations/${extension}`, ready.url), {
-        headers: { cookie }, signal: AbortSignal.timeout(240_000),
+        headers: { cookie }, signal: AbortSignal.timeout(600_000),
       })
       if (!operations.ok) throw new Error(`desktop runtime: ${extension} Office operations failed: ${await operations.text()}`)
       const result = await operations.json() as { images: string[]; converted: string; recalculated: string | null }
@@ -227,6 +230,7 @@ export function apply(ctx) {
         || result.converted !== '504b0304' || (extension === 'xlsx' ? result.recalculated !== '504b0304' : result.recalculated !== null)) {
         throw new Error(`desktop runtime: invalid ${extension} Office operation output: ${JSON.stringify(result)}`)
       }
+      console.log(`desktop runtime: ${extension} Office operations passed (${Math.round(performance.now() - started)}ms)`)
     }
     console.log('desktop runtime: DOCX, XLSX, PPTX to PDF, image rendering, conversion, and recalculation passed')
   } finally {

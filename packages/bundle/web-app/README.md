@@ -9,6 +9,8 @@ English | [中文](README.zh.md)
 
 Desktop analytics follows the [product collection policy](../../client/product-analytics/README.md), including its live application setting. Web usage is excluded.
 
+With `DSH_CLIENT_BRAND=xinji`, Office conversions and image rendering each allow 180 seconds, including cold font indexing. Other builds allow 60 seconds per operation. The `office-kit` row's `timeoutMs` remains configurable through profile patches.
+
 Desktop analytics schedules partial batches every 30 seconds, with a 15-second exporter timeout and a 20-second processor timeout. Shutdown allows 2 seconds to drain, then cancels pending requests and retry waits so telemetry does not keep the Host alive. Pending events may be lost on exit.
 
 ## Summary
