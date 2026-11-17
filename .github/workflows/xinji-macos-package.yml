@@ -70,7 +70,10 @@ jobs:
           apps/desktop/tests/cli-launcher.spec.ts
           --testTimeout 30000
       - name: Build and smoke-test unsigned DMG
+        # macOS supplies native file symlinks that this Windows workstation cannot create.
+        # Keep the repository-escape regression check enabled on the target host.
         run: |
+          pnpm exec vitest run scripts/project-doc-site.spec.ts -t 'refuses a target whose real path escapes the repository'
           mkdir -p output
           set -o pipefail
           pnpm --dir apps/desktop run "package:mac:${DSH_DESKTOP_TARGET_ARCH}:unsigned" --build-version "$BUILD_VERSION" 2>&1 | tee output/macos-package.log
