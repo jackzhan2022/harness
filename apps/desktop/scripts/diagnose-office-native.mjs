@@ -3,6 +3,28 @@ import { createRequire } from 'node:module'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+
+const executeFile = promisify(execFile)
+
+async function sampleSlowOperation(directory, operation) {
+  const { stdout } = await executeFile('/bin/ps', ['-axo', 'pid,ppid,stat,etime,comm'])
+  await writeFile(join(directory, `${operation}-processes.txt`), stdout)
+  const processes = stdout.trim().split('\n').slice(1).map(line => line.trim().split(/\s+/, 5))
+  const descendants = new Set([process.pid])
+  for (let size = 0; size !== descendants.size;) {
+    size = descendants.size
+    for (const [pid, parent] of processes) if (descendants.has(Number(parent))) descendants.add(Number(pid))
+  }
+  for (const pid of descendants) {
+    try {
+      await executeFile('/usr/bin/sample', [String(pid), '2', '-file', join(directory, `${operation}-${pid}-sample.txt`)], { timeout: 10_000 })
+    } catch (error) {
+      console.log(JSON.stringify({ samplePid: pid, error: String(error) }))
+    }
+  }
+}
 
 const [installation, input, destination] = process.argv.slice(2)
 if (!installation || !input || !destination) throw new Error('Office installation, workbook and output directory are required')
@@ -12,8 +34,8 @@ const root = resolve(destination)
 await mkdir(root, { recursive: true })
 const results = []
 console.log(JSON.stringify({ platform: process.platform, arch: process.arch, runtime: await discoverRuntime() }))
-for (const timeoutMs of [60_000, 180_000]) {
-  const directory = join(root, String(timeoutMs))
+for (const [round, timeoutMs] of [180_000, 180_000, 180_000].entries()) {
+  const directory = join(root, String(round))
   await mkdir(directory, { recursive: true })
   const converter = await createConverter({ timeoutMs, fontMetadataCacheDirectory: join(directory, 'fonts') })
   try {
@@ -28,6 +50,8 @@ for (const timeoutMs of [60_000, 180_000]) {
       const started = performance.now()
       console.log(JSON.stringify({ operation, timeoutMs, state: 'starting' }))
       let record
+      let sampling
+      const sampleTimer = setTimeout(() => { sampling = sampleSlowOperation(directory, operation) }, 20_000)
       try {
         const result = await execute()
         if (operation === 'images') {
@@ -43,6 +67,9 @@ for (const timeoutMs of [60_000, 180_000]) {
         record = { timeoutMs, operation, passed: true, elapsedMs: Math.round(performance.now() - started) }
       } catch (error) {
         record = { timeoutMs, operation, passed: false, elapsedMs: Math.round(performance.now() - started), error: String(error), code: error.code }
+      } finally {
+        clearTimeout(sampleTimer)
+        await sampling
       }
       results.push(record)
       console.log(JSON.stringify(record))
