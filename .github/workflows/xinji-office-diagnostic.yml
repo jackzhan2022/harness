@@ -1,0 +1,46 @@
+name: Xinji Agent · Intel Office diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: macos-15-intel
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24.21.0'
+      - name: Install the pinned Office engine in isolation
+        run: |
+          mkdir -p "$RUNNER_TEMP/office-probe"
+          npm install --prefix "$RUNNER_TEMP/office-probe" --ignore-scripts --no-audit --no-fund @deepseek-ai/libreoffice-kit@0.2.3
+      - name: Create the packaging workbook fixture
+        run: |
+          python3 -m venv "$RUNNER_TEMP/office-probe/python"
+          "$RUNNER_TEMP/office-probe/python/bin/python" -m pip install openpyxl==3.1.5
+          "$RUNNER_TEMP/office-probe/python/bin/python" -c 'from openpyxl import Workbook; import os; w=Workbook(); w.active.append(["Desktop Office conversion",42]); w.save(os.environ["RUNNER_TEMP"]+"/office-probe/input.xlsx"); w.close()'
+      - name: Compare native conversion and image deadlines
+        run: |
+          mkdir -p output/office-diagnostic
+          set -o pipefail
+          node apps/desktop/scripts/diagnose-office-native.mjs "$RUNNER_TEMP/office-probe" "$RUNNER_TEMP/office-probe/input.xlsx" output/office-diagnostic 2>&1 | tee output/office-diagnostic.log
+      - name: Upload diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: xinji-intel-office-diagnostic
+          path: |
+            output/office-diagnostic/
+            output/office-diagnostic.log
+          retention-days: 7
+          if-no-files-found: ignore
